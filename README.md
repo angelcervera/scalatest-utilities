@@ -3,4 +3,4 @@
 Please, read test cases as documentation.
 
 ## notes
-To dep
+To release: `sbt release`
