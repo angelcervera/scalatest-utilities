@@ -14,6 +14,20 @@ object FileSystemFixtures {
 
 trait FileSystemFixtures extends GenericHelpers { this: TestSuite =>
 
+  def cleanFolderUp(
+      cleanUpMode: CleanUpMode,
+      tmpFolder: File,
+      fn: File => Unit
+  ): Unit = Try(fn(tmpFolder)) match {
+    case Failure(ex) =>
+      if (cleanUpMode == CLEAN_ALWAYS)
+        tmpFolder.delete(swallowIOExceptions = true)
+      throw ex
+    case Success(_) =>
+      if (cleanUpMode != KEEP_ALWAYS)
+        tmpFolder.delete(swallowIOExceptions = true)
+  }
+
   def withTemporalFolder(
       parentFolder: String = "target/testing-sandbox",
       subfolder: String = "",
@@ -33,14 +47,6 @@ trait FileSystemFixtures extends GenericHelpers { this: TestSuite =>
       s"$parentFolder/$testPath$slashedSubfolder${DateTimeFormatter.ofPattern(timestampPattern).format(runTS)}"
     )
 
-    Try(fn(tmpFolder)) match {
-      case Failure(ex) =>
-        if (cleanUpMode == CLEAN_ALWAYS)
-          tmpFolder.delete(swallowIOExceptions = true)
-        throw ex
-      case Success(_) =>
-        if (cleanUpMode != KEEP_ALWAYS)
-          tmpFolder.delete(swallowIOExceptions = true)
-    }
+    cleanFolderUp(cleanUpMode, tmpFolder, fn)
   }
 }
