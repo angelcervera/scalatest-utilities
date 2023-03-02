@@ -8,9 +8,9 @@ lazy val scala213 = "2.13.10"
 ThisBuild / crossScalaVersions := List(scala212, scala213)
 ThisBuild / releaseCrossBuild := true
 ThisBuild / scalaVersion := scala212
+Test / fork := true
 
 ThisBuild / versionScheme := Some("semver-spec")
-ThisBuild / version := "0.2.0-SNAPSHOT"
 ThisBuild / organization := "com.acervera"
 ThisBuild / scmInfo := Some(
   ScmInfo(
