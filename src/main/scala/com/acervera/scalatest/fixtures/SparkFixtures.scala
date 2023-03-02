@@ -7,7 +7,6 @@ import org.apache.spark.sql.SparkSession.Builder
 import org.scalatest.TestSuite
 
 import scala.language.implicitConversions
-import scala.util.chaining.scalaUtilChainingOps
 
 trait SparkFixtures extends GenericHelpers with FileSystemFixtures {
   this: TestSuite =>
@@ -39,25 +38,29 @@ trait SparkFixtures extends GenericHelpers with FileSystemFixtures {
       fn: SparkSession => Unit
   ): Unit = {
 
-    def applyDelta(b: Builder): Builder = if (delta) {
-      b.config(
-        "spark.sql.extensions",
-        "io.delta.sql.DeltaSparkSessionExtension"
-      ).config(
-        "spark.sql.catalog.spark_catalog",
-        "org.apache.spark.sql.delta.catalog.DeltaCatalog"
-      )
-    } else b
 
-    def applyHive(b: Builder): Builder = if (hive) b.enableHiveSupport() else b
+
+    implicit class BuilderEnrich(b: Builder ) {
+      def applyDelta: Builder = if (delta) {
+        b.config(
+          "spark.sql.extensions",
+          "io.delta.sql.DeltaSparkSessionExtension"
+        ).config(
+          "spark.sql.catalog.spark_catalog",
+          "org.apache.spark.sql.delta.catalog.DeltaCatalog"
+        )
+      } else b
+
+      def applyHive: Builder = if (hive) b.enableHiveSupport() else b
+    }
 
     def run(f: File): Unit = {
 
       val spark = SparkSession
         .builder()
         .config(defaultConfig)
-        .pipe(applyDelta)
-        .pipe(applyHive)
+        .applyDelta
+        .applyHive
         .config(
           "spark.sql.warehouse.dir",
           (f / "spark-warehouse").toString()

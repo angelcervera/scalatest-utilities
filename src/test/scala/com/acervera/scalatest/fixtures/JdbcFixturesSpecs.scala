@@ -3,7 +3,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 import java.sql.DriverManager
-import scala.util.Using
 
 class JdbcFixturesSpecs
     extends AnyWordSpecLike
@@ -46,11 +45,14 @@ class JdbcFixturesSpecs
                         | DROP TABLE PERSONS
                         |""".stripMargin
     ) { con =>
-      Using(DriverManager.getConnection(con.getMetaData.getURL)) { con2 =>
+
+      val con2 = DriverManager.getConnection(con.getMetaData.getURL)
+      try {
         con2
-          .prepareStatement("""
-                              | INSERT INTO PERSONS (id, name) VALUES (2, 'name_2'), (2, 'name_2')
-                              |""".stripMargin)
+          .prepareStatement(
+            """
+              | INSERT INTO PERSONS (id, name) VALUES (2, 'name_2'), (2, 'name_2')
+              |""".stripMargin)
           .execute()
 
         val result =
@@ -61,8 +63,9 @@ class JdbcFixturesSpecs
         result.next()
         result.getInt("C") shouldBe 2
 
+      } finally {
+        con2.close()
       }
-
     }
 
   }

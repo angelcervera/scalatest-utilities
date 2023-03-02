@@ -5,7 +5,7 @@ import org.h2.tools.Server
 import org.scalatest.TestSuite
 
 import java.sql.{Connection, DriverManager}
-import scala.util.{Failure, Success, Try, Using}
+import scala.util.{Failure, Success, Try}
 
 trait JdbcFixtures extends FileSystemFixtures { this: TestSuite =>
 
@@ -15,7 +15,10 @@ trait JdbcFixtures extends FileSystemFixtures { this: TestSuite =>
       cleanUpScript: String = "",
       cleanUpMode: CleanUpMode = KEEP_ON_ERROR
   )(test: Connection => Unit): Unit = {
-    Using(DriverManager.getConnection(url)) { con =>
+
+    val con = DriverManager.getConnection(url)
+    try {
+
       if (setUpScript.nonEmpty) {
         con.prepareStatement(setUpScript).execute()
       }
@@ -31,9 +34,10 @@ trait JdbcFixtures extends FileSystemFixtures { this: TestSuite =>
           if (cleanUpMode != KEEP_ALWAYS && cleanUpScript.nonEmpty)
             con.prepareStatement(cleanUpScript).execute()
       }
-    } match {
-      case Failure(ex) => throw ex
-      case Success(_)  =>
+
+    }
+    finally {
+      con.close()
     }
   }
 

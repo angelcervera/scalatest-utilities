@@ -1,15 +1,17 @@
-val scalatestVersion = "3.2.12"
-val betterFilesVersion = "3.9.1"
-val sparkVersion = "3.2.1"
+val scalatestVersion = "3.2.15"
+val betterFilesVersion = "3.9.2"
+val sparkVersion = "3.3.2"
 val h2Version = "2.1.214"
+
+lazy val scala212 = "2.12.17"
+lazy val scala213 = "2.13.10"
+ThisBuild / crossScalaVersions := List(scala212, scala213)
+ThisBuild / releaseCrossBuild := true
+ThisBuild / scalaVersion := scala212
 
 ThisBuild / versionScheme := Some("semver-spec")
 ThisBuild / version := "0.2.0-SNAPSHOT"
-ThisBuild / scalaVersion := "2.13.8"
 ThisBuild / organization := "com.acervera"
-ThisBuild / homepage := Some(
-  url(s"https://simplexspatial.github.io/osm4scala/")
-)
 ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/simplexportal/scalatest-utilities"),
@@ -48,8 +50,8 @@ publishTo := {
 }
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % scalatestVersion % Optional,
-  "com.h2database" % "h2" % h2Version % Optional,
-  "com.github.pathikrit" %% "better-files" % betterFilesVersion % Optional,
+  "org.scalatest" %% "scalatest" % scalatestVersion % Compile,
+  "com.h2database" % "h2" % h2Version % Compile,
+  "com.github.pathikrit" %% "better-files" % betterFilesVersion % Compile,
   "org.apache.spark" %% "spark-sql" % sparkVersion % Optional
 )
